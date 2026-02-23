@@ -27,7 +27,7 @@ const Login: React.FC = () => {
   } = useLocalStorage<string>("token", ""); // note that the key we are selecting is "token" and the default value we are setting is an empty string
   // if you want to pick a different token, i.e "usertoken", the line above would look as follows: } = useLocalStorage<string>("usertoken", "");
 
-  const handleLogin = async (values: FormFieldProps) => {
+  const handleRegistration = async (values: FormFieldProps) => {
     try {
       // Call the API service and let it handle JSON serialization and error handling
       const response = await apiService.post<User>("/users", values);
@@ -38,12 +38,12 @@ const Login: React.FC = () => {
       }
 
       // Navigate to the user overview
-      router.push("/users");
+      router.push("/registration");
     } catch (error) {
       if (error instanceof Error) {
-        alert(`Something went wrong during the login:\n${error.message}`);
+        alert(`Something went wrong during the registration:\n${error.message}`);
       } else {
-        console.error("An unknown error occurred during login.");
+        console.error("An unknown error occurred during registration.");
       }
     }
   };
@@ -52,10 +52,10 @@ const Login: React.FC = () => {
     <div className="login-container">
       <Form
         form={form}
-        name="login"
+        name="register"
         size="large"
         variant="outlined"
-        onFinish={handleLogin}
+        onFinish={handleRegistration}
         layout="vertical"
       >
         <Form.Item
@@ -66,20 +66,27 @@ const Login: React.FC = () => {
           <Input placeholder="Enter username" />
         </Form.Item>
         <Form.Item
-          name="name"
-          label="Name"
-          rules={[{ required: true, message: "Please input your name!" }]}
+          name="password"
+          label="Password"
+          rules={[{ required: true, message: "Please input your password!" }]}
         >
-          <Input placeholder="Enter name" />
+          <Input placeholder="Enter password" />
+        </Form.Item>
+        <Form.Item
+          name="bio"
+          label="Bio"
+          rules={[{ required: true, message: "Please input a quick bio" }]}
+        >
+          <Input placeholder="Enter bio" />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" className="login-button">
-            Login
+            register
           </Button>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit" className="grey-button" onClick={() => router.push("/registration")}>
-            Register
+          <Button type="primary" htmlType="submit" className="grey-button" onClick={() => router.push("/login")}>
+            login
           </Button>
         </Form.Item>
       </Form>

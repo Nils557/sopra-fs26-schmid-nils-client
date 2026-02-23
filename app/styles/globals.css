@@ -53,6 +53,11 @@ a {
   width: 100%;
 }
 
+.grey-button {
+  width: 100%;
+  background-color: grey !important;
+}
+
 .card-container {
   display: flex;
   justify-content: center;

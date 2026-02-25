@@ -1,6 +1,6 @@
 "use client"; // For components that need React hooks and browser APIs, SSR (server side rendering) has to be disabled. Read more here: https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering
 
-import { useRouter } from "next/navigation"; // use NextJS router for navigation
+import { useRouter, useServerInsertedHTML } from "next/navigation"; // use NextJS router for navigation
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
@@ -13,7 +13,7 @@ interface FormFieldProps {
   value: string;
 }
 
-const Login: React.FC = () => {
+const Register: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [form] = Form.useForm();
@@ -27,6 +27,8 @@ const Login: React.FC = () => {
   } = useLocalStorage<string>("token", ""); // note that the key we are selecting is "token" and the default value we are setting is an empty string
   // if you want to pick a different token, i.e "usertoken", the line above would look as follows: } = useLocalStorage<string>("usertoken", "");
 
+  const { set: setUserId} = useLocalStorage<string>("userId", "");
+
   const handleRegistration = async (values: FormFieldProps) => {
     try {
       // Call the API service and let it handle JSON serialization and error handling
@@ -36,9 +38,12 @@ const Login: React.FC = () => {
       if (response.token) {
         setToken(response.token);
       }
+      if (response.id) {
+        setUserId(response.id.toString());
+      }
 
       // Navigate to the user overview
-      router.push("/registration");
+      router.push('/users/' + response.id);
     } catch (error) {
       if (error instanceof Error) {
         alert(`Something went wrong during the registration:\n${error.message}`);
@@ -61,23 +66,27 @@ const Login: React.FC = () => {
         <Form.Item
           name="username"
           label="Username"
-          rules={[{ required: true, message: "Please input your username!" }]}
+          rules={[{ required: true, message: "Please input your username!" },
+            {whitespace: true, message: "Username can not be empty."}
+          ]}
         >
           <Input placeholder="Enter username" />
         </Form.Item>
         <Form.Item
           name="password"
           label="Password"
-          rules={[{ required: true, message: "Please input your password!" }]}
+          rules={[{required: true, message: "Please input your password!" },
+            {whitespace: true, message: "password can not be emptyspaces!"}
+          ]}
         >
-          <Input placeholder="Enter password" />
+          <Input.Password placeholder="Enter password" />
         </Form.Item>
         <Form.Item
           name="bio"
           label="Bio"
-          rules={[{ required: true, message: "Please input a quick bio" }]}
+          rules={[{max: 200, message: "Bio is to long. (max 200 characters)" }]}
         >
-          <Input placeholder="Enter bio" />
+          <Input.TextArea placeholder="Tell us a bit about yourself..." showCount maxLength={200} autoSize={{ minRows: 3, maxRows: 6 }} />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" className="login-button">
@@ -85,7 +94,7 @@ const Login: React.FC = () => {
           </Button>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit" className="grey-button" onClick={() => router.push("/login")}>
+          <Button type="primary" className="grey-button" onClick={() => router.push("/login")}>
             login
           </Button>
         </Form.Item>
@@ -94,4 +103,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default Register;

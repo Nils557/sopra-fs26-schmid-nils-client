@@ -52,6 +52,11 @@ await apiService.put("/users/" + userId, {
             onFinish={resetPassword}
             layout="vertical"
             >
+            <Form.Item>
+                <h1>Change your password</h1>
+                You are currently logged in to the account with the id: {localStorage.getItem('userId')}
+                <p>You are changing the password linked to your id.</p>
+            </Form.Item>
             <Form.Item
                 name="npassword"
                 label="New password"

@@ -21,39 +21,17 @@ const Login: React.FC = () => {
   // The hook returns an object with the value and two functions
   // Simply choose what you need from the hook:
   const {
-    // value: token, // is commented out because we do not need the token value
-    set: setToken, // we need this method to set the value of the token to the one we receive from the POST request to the backend server API
-    // clear: clearToken, // is commented out because we do not need to clear the token when logging in
+    value: token, // is commented out because we do not need the token value
   } = useLocalStorage<string>("token", ""); // note that the key we are selecting is "token" and the default value we are setting is an empty string
   // if you want to pick a different token, i.e "usertoken", the line above would look as follows: } = useLocalStorage<string>("usertoken", "");
   const { set: setUserId} = useLocalStorage<string>("userId", "");
 
-
-  const handleLogin = async (values: FormFieldProps) => {
-      try {
-        const response = await apiService.post<User>("/login", values);
-
-        if (response.token && response.id) {
-
-          localStorage.setItem("token", response.token);
-          localStorage.setItem("userId", response.id.toString());
+  const resetPassword = async() => {
+    //check if token matches changing id
+    //check if fields match -> reset in backend
+  }
 
 
-          setToken(response.token);
-          setUserId(response.id.toString());
-
-
-          console.log("Login erfolgreich, Token gespeichert!");
-          router.push("/users/" + response.id);
-        } else {
-          alert("Login fehlgeschlagen: Server hat keinen Token oder keine ID gesendet.");
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          alert(`Something went wrong during the login:\n${error.message}`);
-        }
-      }
-    };
 
   return (
     <div className="login-container">
@@ -62,31 +40,31 @@ const Login: React.FC = () => {
         name="login"
         size="large"
         variant="outlined"
-        onFinish={handleLogin}
+        onFinish={resetPassword}
         layout="vertical"
       >
         <Form.Item
-          name="username"
-          label="Username"
-          rules={[{ required: true, message: "Please input your username!" }]}
+          name="npassword"
+          label="New password"
+          rules={[{ required: true, message: "Please input your new password!" }]}
         >
-          <Input placeholder="Enter username" />
+          <Input placeholder="Enter new password" />
         </Form.Item>
         <Form.Item
-          name="password"
-          label="Password"
-          rules={[{ required: true, message: "Password is reqired!" }]}
+          name="repeat_password"
+          label="Repeat new password"
+          rules={[{ required: true, message: "Pleaes repeat your password" }]}
         >
           <Input.Password placeholder="Enter password" />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" className="login-button">
-            Login
+            Reset
           </Button>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="button" className="grey-button" onClick={() => router.push("/registration")}>
-            Register
+          <Button type="primary" htmlType="submit" className="grey-button" onClick={() => router.push("/registration")}>
+            Back
           </Button>
         </Form.Item>
       </Form>

@@ -46,7 +46,7 @@ const Profile: React.FC = () => {
         const fetchedUsers = await apiService.get<User[]>("/users");
         setUsers(fetchedUsers);
       } catch (error) {
-        console.error("Fehler beim Laden:", error);
+        console.error("Error while loading:", error);
       }
     };
 
@@ -99,7 +99,7 @@ const Profile: React.FC = () => {
               <Button onClick={handleLogout} type="primary" danger>
                 Logout
               </Button>
-              <Button onClick={() => console.log("Reset clicked")}>
+              <Button onClick={() => router.push("/resetpassword")}>
                 Reset Password
               </Button>
             </div>

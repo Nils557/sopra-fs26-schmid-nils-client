@@ -65,42 +65,49 @@ const Profile: React.FC = () => {
   }
 
 
-  return (
-    <div style={{ padding: "20px", display: "flex", justifyContent: "center" }}>
-      <Card 
-        title={user ? user.username + "'s profile" : 'Profile not found'} 
-        loading={loading} 
-        style={{ width: 500 }}
-        extra={<Button onClick={() => router.back()}>Go Back</Button>}
-      >
-        {user ? (
-          <Descriptions column={1} bordered size="small">
-            <Descriptions.Item label="Username">
-              {user.username}
-            </Descriptions.Item>
-            
-            <Descriptions.Item label="Status">
-              <Tag color={user.status === "ONLINE" ? "green" : "red"}>
-                {user.status}
-              </Tag>
-            </Descriptions.Item>
+    return (
+        <div className="card-container">
+        <Card 
+            title={user ? user.username + "'s profile" : 'Profile not found'} 
+            loading={loading} 
+            style={{ width: "100%", maxWidth: "800px", margin: "20px auto" }}
+            extra={<Button onClick={() => router.back()}>Go Back</Button>}
+        >
+            {user ? (
+            <>
+                <Descriptions column={1} bordered size="small">
+                <Descriptions.Item label="Username">
+                    {user.username}
+                </Descriptions.Item>
+                
+                <Descriptions.Item label="Status">
+                    <Tag color={user.status === "ONLINE" ? "green" : "red"}>
+                    {user.status}
+                    </Tag>
+                </Descriptions.Item>
 
-            <Descriptions.Item label="Date of creation">
-              {user.creationDate 
-                ? new Date(user.creationDate).toLocaleString("de-DE") 
-                : "Error"}
-            </Descriptions.Item>
+                <Descriptions.Item label="Date of creation">
+                    {user.creationDate 
+                    ? new Date(user.creationDate).toLocaleString("de-DE") 
+                    : "Error"}
+                </Descriptions.Item>
 
-            <Descriptions.Item label="Bio">
-              {user.bio || "No bio set."}
-            </Descriptions.Item>
-          </Descriptions>
-        ) : (
-          !loading && <p>Benutzer mit ID {id} wurde nicht gefunden.</p>
-        )}
-      </Card>
-    </div>
-  );
-};
+                <Descriptions.Item label="Bio">
+                    {user.bio}
+                </Descriptions.Item>
+                </Descriptions>
+
+
+                <div style={{ marginTop: 20 }}>
+
+                </div>
+            </>
+            ) : (
+            !loading && <p>User with {id} could not be found.</p>
+            )}
+        </Card>
+        </div>
+    );
+    };
 
 export default Profile;

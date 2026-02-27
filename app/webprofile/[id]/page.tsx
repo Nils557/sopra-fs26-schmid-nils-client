@@ -84,8 +84,8 @@ const Profile: React.FC = () => {
               </Descriptions.Item>
 
               <Descriptions.Item label="Date of creation">
-                {rawDate 
-                  ? new Date(rawDate).toLocaleString("de-DE") 
+                {user && (user["creation_date" as keyof User] || user.creationDate)
+                  ? new Date((user["creation_date" as keyof User] || user.creationDate) as string).toLocaleString("de-DE") 
                   : "No date"}
               </Descriptions.Item>
 

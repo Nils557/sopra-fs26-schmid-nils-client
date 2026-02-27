@@ -39,7 +39,7 @@ export class ApiService {
   private async processResponse<T>(
     res: Response,
     errorMessage: string,
-  ): Promise<T> {
+  ): Promise<any> {
     if (!res.ok) {
       let errorDetail = res.statusText;
       try {
@@ -64,9 +64,11 @@ export class ApiService {
       error.status = res.status;
       throw error;
     }
-    return res.headers.get("Content-Type")?.includes("application/json")
-      ? (res.json() as Promise<T>)
-      : Promise.resolve(res as T);
+    const data = res.headers.get("Content-Type")?.includes("application/json")
+      ? await res.json()
+      : res;
+
+    return { data, headers: res.headers };
   }
 
   /**

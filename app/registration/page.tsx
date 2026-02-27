@@ -1,6 +1,6 @@
 "use client"; // For components that need React hooks and browser APIs, SSR (server side rendering) has to be disabled. Read more here: https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering
 
-import { useRouter, useServerInsertedHTML } from "next/navigation"; // use NextJS router for navigation
+import { useRouter } from "next/navigation"; // use NextJS router for navigation
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
@@ -31,19 +31,21 @@ const Register: React.FC = () => {
 
   const handleRegistration = async (values: FormFieldProps) => {
     try {
-      // Call the API service and let it handle JSON serialization and error handling
-      const response = await apiService.post<User>("/users", values);
+      const response: any = await apiService.post("/users", values);
+      const token = response.headers?.get("Authorization");
 
-      // Use the useLocalStorage hook that returned a setter function (setToken in line 41) to store the token if available
-      if (response.token) {
-        setToken(response.token);
+      if (token) {
+        setToken(token);
+        console.log("Token gespeichert:", token);
+      } else {
+        console.warn("Kein Token im Header gefunden!");
       }
-      if (response.id) {
-        setUserId(response.id.toString());
+      if (response.data?.id) {
+        setUserId(response.data.id.toString());
+        router.push('/users/' + response.data.id);
+      } else {
+        console.error("Keine ID in response.data gefunden:", response);
       }
-
-      // Navigate to the user overview
-      router.push('/users/' + response.id);
     } catch (error) {
       if (error instanceof Error) {
         alert(`Something went wrong during the registration:\n${error.message}`);
@@ -84,7 +86,9 @@ const Register: React.FC = () => {
         <Form.Item
           name="bio"
           label="Bio"
-          rules={[{max: 200, message: "Bio is to long. (max 200 characters)" }]}
+          rules={[{required: true, message: "Please input your Bio!" },
+            {whitespace: true, message: "Bio can not be emptyspaces!"},
+            {max: 200, message: "Bio is to long. (max 200 characters)" }]}
         >
           <Input.TextArea placeholder="Tell us a bit about yourself..." showCount maxLength={200} autoSize={{ minRows: 3, maxRows: 6 }} />
         </Form.Item>

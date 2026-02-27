@@ -34,8 +34,8 @@ const Profile: React.FC = () => {
     const fetchAndFilterUser = async () => {
       try {
         setLoading(true);
-        const allUsers = await apiService.get<User[]>("/users");
-        const foundUser = allUsers.find((u) => u.id?.toString() === id);
+        const response: any = await apiService.get("/users");
+        const foundUser = response.data.find((u: User) => u.id?.toString() === id);
 
         if (foundUser) {
           setUser(foundUser);
@@ -87,9 +87,9 @@ const Profile: React.FC = () => {
                 </Descriptions.Item>
 
                 <Descriptions.Item label="Date of creation">
-                    {user.creationDate 
-                    ? new Date(user.creationDate).toLocaleString("de-DE") 
-                    : "Error"}
+                  {(user as any).creation_date || user.creationDate 
+                    ? new Date((user as any).creation_date || user.creationDate).toLocaleString("de-DE") 
+                    : "Kein Datum vorhanden"}
                 </Descriptions.Item>
 
                 <Descriptions.Item label="Bio">

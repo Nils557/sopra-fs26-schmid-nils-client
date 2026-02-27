@@ -10,7 +10,7 @@ import type { TableProps } from "antd";
 
 const columns: TableProps<User>["columns"] = [
   { title: "Username", dataIndex: "username", key: "username" },
-  { title: "Name", dataIndex: "name", key: "name" },
+  { title: "Bio", dataIndex: "bio", key: "bio" },
   { title: "Id", dataIndex: "id", key: "id" },
 ];
 
@@ -43,8 +43,8 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const fetchedUsers = await apiService.get<User[]>("/users");
-        setUsers(fetchedUsers);
+        const response: any = await apiService.get("/users");
+        setUsers(response.data);
       } catch (error) {
         console.error("Error while loading:", error);
       }
@@ -57,7 +57,7 @@ const Profile: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await apiService.post("/logout/" + id, {});
+      await apiService.post<any>("/logout/" + id, {});
     } catch (e) {
       console.error("Logout failed", e);
     } finally {

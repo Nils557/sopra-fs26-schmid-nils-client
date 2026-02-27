@@ -31,20 +31,19 @@ const Login: React.FC = () => {
 
   const handleLogin = async (values: FormFieldProps) => {
       try {
-        const response = await apiService.post<User>("/login", values);
+        const response: any = await apiService.post("/login", values);
+        const token = response.headers?.get("Authorization");
+        const userId = response.data?.id;
 
-        if (response.token && response.id) {
+        if (token && userId) {
+          localStorage.setItem("token", token);
+          localStorage.setItem("userId", userId.toString());
 
-          localStorage.setItem("token", response.token);
-          localStorage.setItem("userId", response.id.toString());
-
-
-          setToken(response.token);
-          setUserId(response.id.toString());
-
+          setToken(token);
+          setUserId(userId.toString());
 
           console.log("Login erfolgreich, Token gespeichert!");
-          router.push("/users/" + response.id);
+          router.push("/users/" + userId);
         } else {
           alert("Login fehlgeschlagen: Server hat keinen Token oder keine ID gesendet.");
         }

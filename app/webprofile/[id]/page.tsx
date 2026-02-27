@@ -60,6 +60,8 @@ const Profile: React.FC = () => {
     );
   }
 
+  const rawDate = user ? (user as any).creation_date || user.creationDate : null;
+
   return (
     <div className="card-container">
       <Card 
@@ -82,8 +84,8 @@ const Profile: React.FC = () => {
               </Descriptions.Item>
 
               <Descriptions.Item label="Date of creation">
-                {(user as any).creation_date || user.creationDate 
-                  ? new Date((user as any).creation_date || user.creationDate).toLocaleString("de-DE") 
+                {rawDate 
+                  ? new Date(rawDate).toLocaleString("de-DE") 
                   : "No date"}
               </Descriptions.Item>
 

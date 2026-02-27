@@ -60,7 +60,8 @@ const Profile: React.FC = () => {
     );
   }
 
-  const rawDate = user ? (user as any).creation_date || user.creationDate : null;
+  const userData = user as unknown as Record<string, string | undefined>;
+  const dateString = userData?.creation_date || user?.creationDate;
 
   return (
     <div className="card-container">
@@ -84,8 +85,8 @@ const Profile: React.FC = () => {
               </Descriptions.Item>
 
               <Descriptions.Item label="Date of creation">
-                {user && (user["creation_date" as keyof User] || user.creationDate)
-                  ? new Date((user["creation_date" as keyof User] || user.creationDate) as string).toLocaleString("de-DE") 
+                {dateString 
+                  ? new Date(dateString).toLocaleString("de-DE") 
                   : "No date"}
               </Descriptions.Item>
 

@@ -22,14 +22,13 @@ const Profile: React.FC = () => {
   const [users, setUsers] = useState<User[] | null>(null);
   const [isClient, setIsClient] = useState(false);
   
-  const { value: token, clear: clearToken } = useLocalStorage<string>("token", "");
+  const { clear: clearToken } = useLocalStorage<string>("token", "");
   const { clear: clearUserId } = useLocalStorage<string>("userId", "");
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
- 
   useEffect(() => {
     if (isClient) {
       const storedToken = localStorage.getItem("token");
@@ -39,11 +38,11 @@ const Profile: React.FC = () => {
     }
   }, [isClient, router]);
 
-
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response: any = await apiService.get("/users");
+        // "any" entfernt, Typ User[] direkt an den GET-Call übergeben
+        const response = await apiService.get<User[]>("/users");
         setUsers(response.data);
       } catch (error) {
         console.error("Error while loading:", error);
@@ -57,7 +56,8 @@ const Profile: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await apiService.post<any>("/logout/" + id, {});
+      // <any> hier durch <void> oder ein passendes Interface ersetzen
+      await apiService.post<void>("/logout/" + id, {});
     } catch (e) {
       console.error("Logout failed", e);
     } finally {
@@ -67,7 +67,6 @@ const Profile: React.FC = () => {
     }
   };
 
-
   if (!isClient || (isClient && !localStorage.getItem("token"))) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '100px' }}>
@@ -75,7 +74,6 @@ const Profile: React.FC = () => {
       </div>
     );
   }
-
 
   return (
     <div className="card-container">

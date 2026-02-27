@@ -19,7 +19,6 @@ const Profile: React.FC = () => {
     setIsClient(true);
   }, []);
 
-
   useEffect(() => {
     if (isClient) {
       const token = localStorage.getItem("token");
@@ -29,12 +28,11 @@ const Profile: React.FC = () => {
     }
   }, [isClient, router]);
 
-
   useEffect(() => {
     const fetchAndFilterUser = async () => {
       try {
         setLoading(true);
-        const response: any = await apiService.get("/users");
+        const response = await apiService.get<User[]>("/users");
         const foundUser = response.data.find((u: User) => u.id?.toString() === id);
 
         if (foundUser) {
@@ -49,12 +47,10 @@ const Profile: React.FC = () => {
       }
     };
 
-
     if (id && isClient && localStorage.getItem("token")) {
       fetchAndFilterUser();
     }
   }, [id, apiService, isClient]);
-
 
   if (!isClient || (isClient && !localStorage.getItem("token"))) {
     return (
@@ -64,50 +60,45 @@ const Profile: React.FC = () => {
     );
   }
 
+  return (
+    <div className="card-container">
+      <Card 
+        title={user ? user.username + "'s profile" : 'Profile not found'} 
+        loading={loading} 
+        style={{ width: "100%", maxWidth: "800px", margin: "20px auto" }}
+        extra={<Button onClick={() => router.back()}>Go Back</Button>}
+      >
+        {user ? (
+          <>
+            <Descriptions column={1} bordered size="small">
+              <Descriptions.Item label="Username">
+                {user.username}
+              </Descriptions.Item>
+              
+              <Descriptions.Item label="Status">
+                <Tag color={user.status === "ONLINE" ? "green" : "red"}>
+                  {user.status}
+                </Tag>
+              </Descriptions.Item>
 
-    return (
-        <div className="card-container">
-        <Card 
-            title={user ? user.username + "'s profile" : 'Profile not found'} 
-            loading={loading} 
-            style={{ width: "100%", maxWidth: "800px", margin: "20px auto" }}
-            extra={<Button onClick={() => router.back()}>Go Back</Button>}
-        >
-            {user ? (
-            <>
-                <Descriptions column={1} bordered size="small">
-                <Descriptions.Item label="Username">
-                    {user.username}
-                </Descriptions.Item>
-                
-                <Descriptions.Item label="Status">
-                    <Tag color={user.status === "ONLINE" ? "green" : "red"}>
-                    {user.status}
-                    </Tag>
-                </Descriptions.Item>
+              <Descriptions.Item label="Date of creation">
+                {(user as any).creation_date || user.creationDate 
+                  ? new Date((user as any).creation_date || user.creationDate).toLocaleString("de-DE") 
+                  : "No date"}
+              </Descriptions.Item>
 
-                <Descriptions.Item label="Date of creation">
-                  {(user as any).creation_date || user.creationDate 
-                    ? new Date((user as any).creation_date || user.creationDate).toLocaleString("de-DE") 
-                    : "Kein Datum vorhanden"}
-                </Descriptions.Item>
-
-                <Descriptions.Item label="Bio">
-                    {user.bio}
-                </Descriptions.Item>
-                </Descriptions>
-
-
-                <div style={{ marginTop: 20 }}>
-
-                </div>
-            </>
-            ) : (
-            !loading && <p>User with {id} could not be found.</p>
-            )}
-        </Card>
-        </div>
-    );
-    };
+              <Descriptions.Item label="Bio">
+                {user.bio}
+              </Descriptions.Item>
+            </Descriptions>
+            <div style={{ marginTop: 20 }}></div>
+          </>
+        ) : (
+          !loading && <p>User with {id} could not be found.</p>
+        )}
+      </Card>
+    </div>
+  );
+};
 
 export default Profile;

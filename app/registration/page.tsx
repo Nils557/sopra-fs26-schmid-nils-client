@@ -1,12 +1,9 @@
-"use client"; // For components that need React hooks and browser APIs, SSR (server side rendering) has to be disabled. Read more here: https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering
+"use client";
 
-import { useRouter } from "next/navigation"; // use NextJS router for navigation
+import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { User } from "@/types/user";
 import { Button, Form, Input } from "antd";
-// Optionally, you can import a CSS module or file for additional styling:
-// import styles from "@/styles/page.module.css";
 
 interface FormFieldProps {
   label: string;
@@ -17,21 +14,13 @@ const Register: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [form] = Form.useForm();
-  // useLocalStorage hook example use
-  // The hook returns an object with the value and two functions
-  // Simply choose what you need from the hook:
-  const {
-    // value: token, // is commented out because we do not need the token value
-    set: setToken, // we need this method to set the value of the token to the one we receive from the POST request to the backend server API
-    // clear: clearToken, // is commented out because we do not need to clear the token when logging in
-  } = useLocalStorage<string>("token", ""); // note that the key we are selecting is "token" and the default value we are setting is an empty string
-  // if you want to pick a different token, i.e "usertoken", the line above would look as follows: } = useLocalStorage<string>("usertoken", "");
-
-  const { set: setUserId} = useLocalStorage<string>("userId", "");
+  
+  const { set: setToken } = useLocalStorage<string>("token", "");
+  const { set: setUserId } = useLocalStorage<string>("userId", "");
 
   const handleRegistration = async (values: FormFieldProps) => {
     try {
-      const response: any = await apiService.post("/users", values);
+      const response = await apiService.post<any>("/users", values);
       const token = response.headers?.get("Authorization");
 
       if (token) {
@@ -40,6 +29,7 @@ const Register: React.FC = () => {
       } else {
         console.warn("Kein Token im Header gefunden!");
       }
+      
       if (response.data?.id) {
         setUserId(response.data.id.toString());
         router.push('/users/' + response.data.id);

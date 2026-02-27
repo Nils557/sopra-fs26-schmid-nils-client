@@ -1,6 +1,12 @@
 import { getApiDomain } from "@/utils/domain";
 import { ApplicationError } from "@/types/error";
 
+
+export interface ApiResponse<T> {
+  data: T;
+  headers: Headers;
+}
+
 export class ApiService {
   private baseURL: string;
   private defaultHeaders: HeadersInit;
@@ -16,7 +22,6 @@ export class ApiService {
   private getHeaders(): HeadersInit {
     let token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     
-    //replace "" because they are stored like "ajlsdkja-sadöa"
     if (token) {
       token = token.replace(/"/g, '');
     }
@@ -27,19 +32,10 @@ export class ApiService {
     };
   }
 
-  /**
-   * Helper function to check the response, parse JSON,
-   * and throw an error if the response is not OK.
-   *
-   * @param res - The response from fetch.
-   * @param errorMessage - A descriptive error message for this call.
-   * @returns Parsed JSON data.
-   * @throws ApplicationError if res.ok is false.
-   */
   private async processResponse<T>(
     res: Response,
     errorMessage: string,
-  ): Promise<any> {
+  ): Promise<ApiResponse<T>> {
     if (!res.ok) {
       let errorDetail = res.statusText;
       try {
@@ -64,19 +60,15 @@ export class ApiService {
       error.status = res.status;
       throw error;
     }
+
     const data = res.headers.get("Content-Type")?.includes("application/json")
       ? await res.json()
-      : res;
+      : ({} as T);
 
     return { data, headers: res.headers };
   }
 
-  /**
-   * GET request.
-   * @param endpoint - The API endpoint (e.g. "/users").
-   * @returns JSON data of type T.
-   */
-  public async get<T>(endpoint: string): Promise<T> {
+  public async get<T>(endpoint: string): Promise<ApiResponse<T>> { 
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "GET",
@@ -88,13 +80,7 @@ export class ApiService {
     );
   }
 
-  /**
-   * POST request.
-   * @param endpoint - The API endpoint (e.g. "/users").
-   * @param data - The payload to post.
-   * @returns JSON data of type T.
-   */
-  public async post<T>(endpoint: string, data: unknown): Promise<T> {
+  public async post<T>(endpoint: string, data: unknown): Promise<ApiResponse<T>> { 
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "POST",
@@ -107,13 +93,7 @@ export class ApiService {
     );
   }
 
-  /**
-   * PUT request.
-   * @param endpoint - The API endpoint (e.g. "/users/123").
-   * @param data - The payload to update.
-   * @returns JSON data of type T.
-   */
-  public async put<T>(endpoint: string, data: unknown): Promise<T> {
+  public async put<T>(endpoint: string, data: unknown): Promise<ApiResponse<T>> { 
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "PUT",
@@ -126,12 +106,7 @@ export class ApiService {
     );
   }
 
-  /**
-   * DELETE request.
-   * @param endpoint - The API endpoint (e.g. "/users/123").
-   * @returns JSON data of type T.
-   */
-  public async delete<T>(endpoint: string): Promise<T> {
+  public async delete<T>(endpoint: string): Promise<ApiResponse<T>> { 
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "DELETE",

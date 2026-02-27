@@ -31,9 +31,9 @@ const Login: React.FC = () => {
 
   const handleLogin = async (values: FormFieldProps) => {
       try {
-        const response: any = await apiService.post("/login", values);
-        const token = response.headers?.get("Authorization");
-        const userId = response.data?.id;
+        const response = await apiService.post<User>("/login", values);
+        const token = response.headers.get("Authorization");
+        const userId = (response.data as User).id;
 
         if (token && userId) {
           localStorage.setItem("token", token);

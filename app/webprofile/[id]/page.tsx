@@ -9,16 +9,18 @@ import React, { useEffect, useState } from "react";
 const Profile: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
-  const { id } = useParams();
+  const { id } = useParams(); //extracts {id} from URL
 
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isClient, setIsClient] = useState(false); 
+  const [user, setUser] = useState<User | null>(null); //the found user, null = not loaded yet
+  const [loading, setLoading] = useState<boolean>(true);  //tracks if data is still being fetched
+  const [isClient, setIsClient] = useState(false); //tracks if we're in the browser
 
+  //confirm we're in the browser
   useEffect(() => {
     setIsClient(true);
-  }, []);
+  }, []); //[] -> runs once
 
+  //check if user is logged in
   useEffect(() => {
     if (isClient) {
       const token = localStorage.getItem("token");
@@ -26,32 +28,40 @@ const Profile: React.FC = () => {
         router.push("/login");
       }
     }
-  }, [isClient, router]);
+  }, [isClient, router]); //rerun if isClinent or router are changed and at start
 
+  //fetch all users and find the one matching the URL id
   useEffect(() => {
     const fetchAndFilterUser = async () => {
       try {
-        setLoading(true);
+        setLoading(true); // show loading state while fetching
+
+        //GET /users -> fetch ALL users
         const response = await apiService.get<User[]>("/users");
+
+        //Find the user whose id matches the id from the URL
+        //.toString() bc url needs str no int
         const foundUser = response.data.find((u: User) => u.id?.toString() === id);
 
         if (foundUser) {
-          setUser(foundUser);
+          setUser(foundUser); // user found -> store in state
         } else {
           console.error("Error while loading the profile");
         }
       } catch (error) {
         console.error("Error", error);
       } finally {
-        setLoading(false);
+        setLoading(false); //stop loading, after success or failure
       }
     };
 
+    //Only fetch if: URL has an id AND we're in the browser AND user is logged in
     if (id && isClient && localStorage.getItem("token")) {
       fetchAndFilterUser();
     }
-  }, [id, apiService, isClient]);
+  }, [id, apiService, isClient]); //rerun if any of those is changed
 
+  //show spinner while loading
   if (!isClient || (isClient && !localStorage.getItem("token"))) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '100px' }}>
@@ -60,8 +70,9 @@ const Profile: React.FC = () => {
     );
   }
 
+  //handles inconsistent field names from backend
   const userData = user as unknown as Record<string, string | undefined>;
-  const dateString = userData?.creation_date || user?.creationDate;
+  const dateString = userData?.creation_date || user?.creationDate; //check both (I mixed it up in the backend)
 
   return (
     <div className="card-container">
@@ -97,6 +108,7 @@ const Profile: React.FC = () => {
             <div style={{ marginTop: 20 }}></div>
           </>
         ) : (
+          // Only show "not found" message after loading is complete
           !loading && <p>User with {id} could not be found.</p>
         )}
       </Card>

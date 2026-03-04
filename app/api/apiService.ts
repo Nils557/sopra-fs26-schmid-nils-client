@@ -1,10 +1,11 @@
 import { getApiDomain } from "@/utils/domain";
 import { ApplicationError } from "@/types/error";
 
-
+//Generic interface that wraps any API response into a consistent shape
+//<T> is a placeholder for whatever data type the response contains
 export interface ApiResponse<T> {
-  data: T;
-  headers: Headers;
+  data: T; //response body
+  headers: Headers; //response header
 }
 
 export class ApiService {
@@ -20,15 +21,22 @@ export class ApiService {
   }
 
   private getHeaders(): HeadersInit {
+    //Safely read the token from localStorage (browser storage)
+    //"typeof window !== undefined" checks if we're in a browser environment
+    //localStorage doesn't exist on a server
     let token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     
+    //If a token exists, strip any accidental double-quote characters
+    //'"abc123"' → 'abc123'
+    //can happen if the token was stored with JSON.stringify() wrapping it
     if (token) {
       token = token.replace(/"/g, '');
     }
-
+    //build and retrun the final header object
     return {
-      ...this.defaultHeaders,
-      ...(token ? { "Authorization": token } : {}),
+      ...this.defaultHeaders, //spread in default headers
+      ...(token ? { "Authorization": token } : {}), // if token exists -> add Authorization header else adds nothing
+      // ... Spread-Operator: unpacks the header and adds the tocken to it in a new object 
     };
   }
 
@@ -72,7 +80,7 @@ export class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "GET",
-      headers: this.getHeaders(), 
+      headers: this.getHeaders(), //using my own function no defaultHeader
     });
     return this.processResponse<T>(
       res,
@@ -84,7 +92,7 @@ export class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "POST",
-      headers: this.getHeaders(), 
+      headers: this.getHeaders(), //using my own function no defaultHeader
       body: JSON.stringify(data),
     });
     return this.processResponse<T>(
@@ -97,7 +105,7 @@ export class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "PUT",
-      headers: this.getHeaders(), 
+      headers: this.getHeaders(), //using my own function no defaultHeader
       body: JSON.stringify(data),
     });
     return this.processResponse<T>(
@@ -110,7 +118,7 @@ export class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "DELETE",
-      headers: this.getHeaders(), 
+      headers: this.getHeaders(), //using my own function no defaultHeader
     });
     return this.processResponse<T>(
       res,

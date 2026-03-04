@@ -6,6 +6,8 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { Button, Form, Input } from "antd";
 import { User } from "@/types/user";
 
+
+// Defines the shape of the form fields(optional with "?", none of them are required to be filled in at the Type level)
 interface FormFieldProps {
   username?: string;
   password?: string;
@@ -13,22 +15,29 @@ interface FormFieldProps {
 }
 
 const Register: React.FC = () => {
-  const router = useRouter();
+  const router = useRouter(); //for redirecting after registration
   const apiService = useApi();
   const [form] = Form.useForm();
   
+  //setts token and id to local storage
   const { set: setToken } = useLocalStorage<string>("token", "");
   const { set: setUserId } = useLocalStorage<string>("userId", "");
 
   const handleRegistration = async (values: FormFieldProps) => {
     try {
+      //POST to "/users" with form values (username, password, bio), a User Object is expected as response value
       const response = await apiService.post<User>("/users", values);
+      //Safely read the Authorization token from response headers
+      //"?." = optional chaining, won't crash if headers is null/undefined
       const token = response.headers?.get("Authorization");
 
+      //If token exists, save it to localStorage via the custom hook
       if (token) {
         setToken(token);
       } 
       
+      //If the response contains a user ID, save it and redirect to profile page
+      //"?." = safely access .id without crashing if response.data is null
       if (response.data?.id) {
         setUserId(response.data.id.toString());
         router.push('/users/' + response.data.id);

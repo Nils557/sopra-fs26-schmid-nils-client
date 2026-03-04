@@ -30,23 +30,31 @@ const Login: React.FC = () => {
 
 
   const handleLogin = async (values: FormFieldProps) => {
+    //try catch if any server errors happen
       try {
+        //Send a POST request to "/login" with the form values (username + password), <User> = responsedata will be shaped like a user
         const response = await apiService.post<User>("/login", values);
+        //Extract the auth token from the response headers (Authorization: "abc123")
         const token = response.headers.get("Authorization");
+        //Extract the user's ID from the response body
         const userId = (response.data as User).id;
 
+        //Only proceed if token AND userId were received
         if (token && userId) {
+          //Set token and userId in localStorage (so PageRefreshes don't delete them)
           localStorage.setItem("token", token);
           localStorage.setItem("userId", userId.toString());
 
+          //Update global app state so other components know the user is logged in
           setToken(token);
           setUserId(userId.toString());
 
-          console.log("Login erfolgreich, Token gespeichert!");
+          console.log("Login done, Token saved!"); //for testing
           router.push("/users/" + userId);
         } else {
-          alert("Login fehlgeschlagen: Server hat keinen Token oder keine ID gesendet.");
+          alert("Login failed: Server has not sent a Token or an ID.");
         }
+        //catch any other failure
       } catch (error) {
         if (error instanceof Error) {
           alert(`Something went wrong during the login:\n${error.message}`);

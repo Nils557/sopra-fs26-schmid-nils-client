@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { Button, Form, Input, message, App } from "antd";
 
+
+//Defines the shape of the reset password form. Both fields are required bc there is no ?
 interface ResetPasswordValues {
   npassword: string;
   repeat_password: string;
@@ -16,27 +18,33 @@ const ResetPassword: React.FC = () => {
     const [form] = Form.useForm();
 
     const resetPassword = async (values: ResetPasswordValues) => {
+        //Destructure both password fields from the form values
         const { npassword, repeat_password } = values;
+        //Read userId from localStorage and strip any accidental quotes
+        //'"5"' -> '5'
         const userIdRaw = localStorage.getItem('userId');
         const userId = userIdRaw ? userIdRaw.replace(/"/g, '') : ''; 
 
         if (npassword !== repeat_password) {
             message.error("The passwords must match!");
-            return;
+            return; //stop here
         }
 
         if (!userId) {
             message.error("User ID not found. Please log in again.");
-            return;
+            return; //stop here
         }
 
         try {
+            //Send PUT request to "/users/{id}" with just the new password
+            //The backend's updateUser handles the password update logic
             await apiService.put(`/users/${userId}`, {
                 password: npassword 
             });
             
             message.success("Password changed successfully");
             router.push("/login");
+            //Log the full error for debugging, show a short message to the user
         } catch (error) {
             console.error("Update failed:", error);
             message.error("Failed to update password");
@@ -70,7 +78,7 @@ const ResetPassword: React.FC = () => {
                 <Form.Item
                     name="repeat_password"
                     label="Repeat new password"
-                    dependencies={['npassword']} 
+                    dependencies={['npassword']} //looks that the passwords are the same
                     rules={[
                     { required: true, message: "Please repeat your password" },
                     ({ getFieldValue }) => ({

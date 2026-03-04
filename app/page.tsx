@@ -21,7 +21,7 @@ export default function Home() {
           </h1>
         </li>
         <li>
-          Nils Schmid
+          Nils Schmid / 24-700-502
         </li>
       </Form.Item>
         <Form.Item>

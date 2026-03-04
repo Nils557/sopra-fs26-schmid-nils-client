@@ -7,10 +7,12 @@ import { User } from "@/types/user";
 import { Button, Card, Table, Spin } from "antd";
 import React, { useEffect, useState } from "react";
 import type { TableProps } from "antd";
+import { userAgent } from "next/server";
 
+//Defines what columns the user table has and which User field each column displays
 const columns: TableProps<User>["columns"] = [
-  { title: "Username", dataIndex: "username", key: "username" },
-  { title: "Bio", dataIndex: "bio", key: "bio" },
+  { title: "Username", dataIndex: "username", key: "username" }, //shows user.username
+  { title: "Bio", dataIndex: "bio", key: "bio" }, //...
   { title: "Id", dataIndex: "id", key: "id" },
 ];
 
@@ -19,16 +21,18 @@ const Profile: React.FC = () => {
   const apiService = useApi();
   const { id } = useParams();
 
-  const [users, setUsers] = useState<User[] | null>(null);
-  const [isClient, setIsClient] = useState(false);
+  const [users, setUsers] = useState<User[] | null>(null); //stores fetched users, null = not loaded yet
+  const [isClient, setIsClient] = useState(false); //tracks if we're running in the browser yet
   
-  const { clear: clearToken } = useLocalStorage<string>("token", "");
-  const { clear: clearUserId } = useLocalStorage<string>("userId", "");
+  const { clear: clearToken } = useLocalStorage<string>("token", ""); // clears token from localStorage
+  const { clear: clearUserId } = useLocalStorage<string>("userId", ""); // clears id from localStorage
 
+  //checks if we are in browser
   useEffect(() => {
     setIsClient(true);
-  }, []);
+  }, []); //[] runs once, [user] at the start and every time the user changes
 
+  //redirect to login if no token
   useEffect(() => {
     if (isClient) {
       const storedToken = localStorage.getItem("token");
@@ -36,37 +40,40 @@ const Profile: React.FC = () => {
         router.push("/login");
       }
     }
-  }, [isClient, router]);
+  }, [isClient, router]); //does it at start and every time isClient or router change
 
+
+  //fetch all users from the API
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // "any" entfernt, Typ User[] direkt an den GET-Call übergeben
+        //GET /users -> returns a list of all users
         const response = await apiService.get<User[]>("/users");
-        setUsers(response.data);
+        setUsers(response.data); //store users in state -> triggers re-render (to actually show the users)
       } catch (error) {
         console.error("Error while loading:", error);
       }
     };
 
+    //Only fetch if we're in the browser AND a token exists (user is logged in)
     if (isClient && localStorage.getItem("token")) { 
       fetchUsers();
     }
-  }, [apiService, isClient]);
+  }, [apiService, isClient]); //re-runs if apiService or isClient changes
 
   const handleLogout = async () => {
     try {
-      // <any> hier durch <void> oder ein passendes Interface ersetzen
+      //POST /logout/{id} → tells the backend to set user status to OFFLINE
       await apiService.post<void>("/logout/" + id, {});
     } catch (e) {
-      console.error("Logout failed", e);
+      console.error("Logout failed", e); //log error but don't block logout
     } finally {
       clearToken();
       clearUserId();
       router.push("/login");
     }
   };
-
+  //Loading screen: Show spinner if: not yet client-side OR client-side but no token yet
   if (!isClient || (isClient && !localStorage.getItem("token"))) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '100px' }}>
@@ -79,18 +86,18 @@ const Profile: React.FC = () => {
     <div className="card-container">
       <Card
         title="User Profile & Dashboard"
-        loading={!users}
+        loading={!users} //shows Ant Design skeleton loader while users is null
         style={{ width: "100%", maxWidth: "800px", margin: "20px auto" }}
       >
-        {users && (
+        {users && ( // only render content once users have loaded
           <>
             <Table<User>
               columns={columns}
-              dataSource={users}
-              rowKey="id"
+              dataSource={users} //the array of users to display
+              rowKey="id"   //unique key for each row (uses user.id)
               onRow={(row) => ({
                 onClick: () => router.push(`/webprofile/${row.id}`),
-                style: { cursor: "pointer" },
+                style: { cursor: "pointer" }, // show pointer cursor on hover
               })}
             />
             <div style={{ marginTop: 20, display: 'flex', gap: '10px' }}>

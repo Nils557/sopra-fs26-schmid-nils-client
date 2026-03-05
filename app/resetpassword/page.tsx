@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation"; 
 import { useApi } from "@/hooks/useApi";
 import { Button, Form, Input, message, App } from "antd";
+import useLocalStorage from "@/hooks/useLocalStorage";
 
 
 //Defines the shape of the reset password form. Both fields are required bc there is no ?
@@ -16,6 +17,8 @@ const ResetPassword: React.FC = () => {
     const router = useRouter();
     const apiService = useApi();
     const [form] = Form.useForm();
+    const { clear: clearToken } = useLocalStorage<string>("token", ""); // clears token from localStorage
+    const { clear: clearUserId } = useLocalStorage<string>("userId", ""); // clears id from localStorage
 
     const resetPassword = async (values: ResetPasswordValues) => {
         //Destructure both password fields from the form values
@@ -43,6 +46,8 @@ const ResetPassword: React.FC = () => {
             });
             
             message.success("Password changed successfully");
+            clearToken();
+            clearUserId();
             router.push("/login");
             //Log the full error for debugging, show a short message to the user
         } catch (error) {
